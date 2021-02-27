@@ -54,8 +54,8 @@ for folder in folder_names:
         with open(tsv_file, "w") as out_file:
             tsv_writer = csv.writer(out_file, delimiter='\t')
             for i in range(NUM_EXAMPLES):
-                question = f.readline()
-                answer = f.readline()
+                question = f.readline().strip()
+                answer = f.readline().strip()
                 tsv_writer.writerow([question, answer, question_type])
         
         print(f'Writing to {tsv_file}')
