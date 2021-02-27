@@ -40,8 +40,14 @@ class Node:
   def to_string(self, debug=False) -> str:
     """ Converts the AST to a string representation. Enable debug for readability (spaces).
     """
-    s = str(self.value)
-    if self.token_type != TokenType.T_NUM:
+    if self.token_type == TokenType.T_NUM:
+      # Deal with annoying floating point precision stuff
+      val = round(self.value, 12)
+      if val == int(val):
+        val = int(val)
+      s = str(val)
+
+    else:
       sep = ' ' if debug else ''
       left_str = self.children[0].to_string(debug)
       right_str = self.children[1].to_string(debug)
@@ -187,6 +193,7 @@ def parse_e3(tokens: [Node]) -> Node:
 def parse(inputstring: str) -> Node:
   """ Parses an arithmetic string into an abstract syntax tree.
   """
+  inputstring = ''.join(inputstring.split())
   tokens = lexical_analysis(inputstring)
   ast = parse_e(tokens)
   match(tokens, TokenType.T_END)
@@ -209,7 +216,6 @@ def generate_datapoints(inputstring: str, debug=False) -> [(str, str, int)]:
   return datapoints
 
 if __name__ == '__main__':
-  inp = ''.join(sys.argv[1].split())
   # ast = parse(inp)
-  for datapoint in generate_datapoints(inp, debug=True):
+  for datapoint in generate_datapoints(sys.argv[1], debug=True):
     print(datapoint)
