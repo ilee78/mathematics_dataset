@@ -192,7 +192,7 @@ def parse(inputstring: str) -> Node:
   match(tokens, TokenType.T_END)
   return ast
 
-def generate_datapoints(inputstring: str, debug=False) -> [(str, str, bool)]:
+def generate_datapoints(inputstring: str, debug=False) -> [(str, str, int)]:
   """ Generates a list of (expr, next_expr, finished) tuples for a given arithmetic expression.
   """
   datapoints = []
@@ -204,7 +204,7 @@ def generate_datapoints(inputstring: str, debug=False) -> [(str, str, bool)]:
     reduced = ast.to_string(debug)
     finished = not ast.is_reducable()
 
-    datapoints.append((curr, reduced, finished))
+    datapoints.append((curr, reduced, int(finished)))
   
   return datapoints
 
