@@ -61,7 +61,7 @@ class Node:
   def is_reducable(self) -> bool:
     """ Convenience function to determine whether this Node is reducable.
     """
-    return self.token_type != TokenType.T_NUM or self.paren
+    return self.token_type != TokenType.T_NUM
 
   def step(self):
     """ Reduces the expression represented by this Node by randomly selecting one of its children
@@ -69,7 +69,6 @@ class Node:
     numerical value of this Node.
     """
     if self.token_type == TokenType.T_NUM:
-      self.paren = False
       return
     
     # If both children are numeric, reduce this node
@@ -84,6 +83,7 @@ class Node:
       operation = operations[self.token_type]
 
       self.token_type = TokenType.T_NUM
+      self.paren = False
       self.value = operation(left_val, right_val)
       if int(self.value) == self.value:
         self.value = int(self.value)
@@ -92,8 +92,6 @@ class Node:
 
     # Otherwise, pick one of the children to reduce
     child_ind = 0 if left_reducable else 1
-    if left_reducable and right_reducable:
-      child_ind = random.randint(0, 1)
     self.children[child_ind].step()
 
 
