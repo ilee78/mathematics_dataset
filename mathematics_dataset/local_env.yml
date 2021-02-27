@@ -1,0 +1,10 @@
+name: mathdata
+channels:
+  - defaults
+dependencies:
+  - sympy
+  - numpy
+  - tensorflow
+  - absl-py
+  - six
+  - pip

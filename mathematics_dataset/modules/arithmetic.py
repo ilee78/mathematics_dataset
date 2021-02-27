@@ -59,8 +59,8 @@ def _make_modules(entropy, add_sub_entropy):
           add_or_sub, None, add_sub_sample_args_pure),
       'add_sub_multiple': functools.partial(
           add_sub_multiple, _INT, sample_args_pure),
-      'add_or_sub_in_base': functools.partial(
-          add_or_sub_in_base, sample_args_pure),
+      # 'add_or_sub_in_base': functools.partial(
+      #     add_or_sub_in_base, sample_args_pure),
 
       # Multiplication and division
       'mul': functools.partial(mul, None, sample_args_pure),
@@ -71,10 +71,10 @@ def _make_modules(entropy, add_sub_entropy):
       # All together!
       'mixed': functools.partial(mixed, _INT_OR_RATIONAL, sample_args_pure),
 
-      # And some other arithmetic-related stuff.
-      'nearest_integer_root': functools.partial(
-          nearest_integer_root, sample_args_pure),
-      'simplify_surd': functools.partial(simplify_surd, None, sample_args_pure),
+      # # And some other arithmetic-related stuff.
+      # 'nearest_integer_root': functools.partial(
+      #     nearest_integer_root, sample_args_pure),
+      # 'simplify_surd': functools.partial(simplify_surd, None, sample_args_pure),
   }
 
 
@@ -138,19 +138,20 @@ def _add_question_or_entity(context, p, q, is_question):
   value = p.value + q.value
 
   if is_question:
-    template = random.choice([
-        '{p} + {q}',
-        '{p}+{q}',
-        'Work out {p} + {q}.',
-        'Add {p} and {q}.',
-        'Put together {p} and {q}.',
-        'Sum {p} and {q}.',
-        'Total of {p} and {q}.',
-        'Add together {p} and {q}.',
-        'What is {p} plus {q}?',
-        'Calculate {p} + {q}.',
-        'What is {p} + {q}?',
-    ])
+    template = '{p}+{q}'
+    # template = random.choice([
+    #     '{p} + {q}',
+    #     '{p}+{q}',
+    #     'Work out {p} + {q}.',
+    #     'Add {p} and {q}.',
+    #     'Put together {p} and {q}.',
+    #     'Sum {p} and {q}.',
+    #     'Total of {p} and {q}.',
+    #     'Add together {p} and {q}.',
+    #     'What is {p} plus {q}?',
+    #     'Calculate {p} + {q}.',
+    #     'What is {p} + {q}?',
+    # ])
     return example.Problem(
         question=example.question(context, template, p=p, q=q),
         answer=value)
@@ -167,22 +168,23 @@ def _sub_question_or_entity(context, p, q, is_question):
   value = p.value - q.value
 
   if is_question:
-    templates = [
-        '{p} - {q}',
-        'Work out {p} - {q}.',
-        'What is {p} minus {q}?',
-        'What is {p} take away {q}?',
-        'What is {q} less than {p}?',
-        'Subtract {q} from {p}.',
-        'Calculate {p} - {q}.',
-        'What is {p} - {q}?',
-    ]
-    if sympy.Ge(p.value, q.value):
-      # We calculate p - q, so the difference (|p - q|) is the correct answer.
-      for adjective in ['distance', 'difference']:
-        for pair in ['{p} and {q}', '{q} and {p}']:
-          templates.append('What is the {} between {}?'.format(adjective, pair))
-    template = random.choice(templates)
+    template = '{p}-{q}'
+    # templates = [
+    #     '{p} - {q}',
+    #     'Work out {p} - {q}.',
+    #     'What is {p} minus {q}?',
+    #     'What is {p} take away {q}?',
+    #     'What is {q} less than {p}?',
+    #     'Subtract {q} from {p}.',
+    #     'Calculate {p} - {q}.',
+    #     'What is {p} - {q}?',
+    # ]
+    # if sympy.Ge(p.value, q.value):
+    #   # We calculate p - q, so the difference (|p - q|) is the correct answer.
+    #   for adjective in ['distance', 'difference']:
+    #     for pair in ['{p} and {q}', '{q} and {p}']:
+    #       templates.append('What is the {} between {}?'.format(adjective, pair))
+    # template = random.choice(templates)
     return example.Problem(
         question=example.question(context, template, p=p, q=q),
         answer=value)
@@ -275,18 +277,19 @@ def mul(value, sample_args, context=None):
   answer = p.value * q.value
 
   if is_question:
-    templates = [
-        '{p}' + ops.MUL_SYMBOL + '{q}',
-        '{p} ' + ops.MUL_SYMBOL + ' {q}',
-        'Calculate {p}' + ops.MUL_SYMBOL + '{q}.',
-        'Work out {p} ' + ops.MUL_SYMBOL + ' {q}.',
-        'Multiply {p} and {q}.',
-        'Product of {p} and {q}.',
-        'What is the product of {p} and {q}?',
-        '{p} times {q}',
-        'What is {p} times {q}?',
-    ]
-    template = random.choice(templates)
+    template = '{p}' + ops.MUL_SYMBOL + '{q}'
+    # templates = [
+    #     '{p}' + ops.MUL_SYMBOL + '{q}',
+    #     '{p} ' + ops.MUL_SYMBOL + ' {q}',
+    #     'Calculate {p}' + ops.MUL_SYMBOL + '{q}.',
+    #     'Work out {p} ' + ops.MUL_SYMBOL + ' {q}.',
+    #     'Multiply {p} and {q}.',
+    #     'Product of {p} and {q}.',
+    #     'What is the product of {p} and {q}?',
+    #     '{p} times {q}',
+    #     'What is {p} times {q}?',
+    # ]
+    # template = random.choice(templates)
     return example.Problem(
         question=example.question(context, template, p=p, q=q),
         answer=answer
@@ -322,12 +325,13 @@ def div(value, sample_args, context=None):
   p, q = context.sample(sample_args, [p, q])
 
   if is_question:
-    template = random.choice([
-        'Divide {p} by {q}.',
-        '{p} divided by {q}',
-        'What is {p} divided by {q}?',
-        'Calculate {p} divided by {q}.',
-    ])
+    template = '{p}/{q}'
+    # template = random.choice([
+    #     'Divide {p} by {q}.',
+    #     '{p} divided by {q}',
+    #     'What is {p} divided by {q}?',
+    #     'Calculate {p} divided by {q}.',
+    # ])
     return example.Problem(
         question=example.question(context, template, p=p, q=q),
         answer=answer
@@ -405,13 +409,14 @@ def _calculate(value, sample_args, context, add_sub, mul_div, length=None):
   context.sample_by_replacing_constants(sample_args, op)
 
   if is_question:
-    template = random.choice([
-        '{op}',
-        'What is {op}?',
-        'Evaluate {op}.',
-        'Calculate {op}.',
-        'What is the value of {op}?',
-    ])
+    template = '{op}'
+    # template = random.choice([
+    #     '{op}',
+    #     'What is {op}?',
+    #     'Evaluate {op}.',
+    #     'Calculate {op}.',
+    #     'What is the value of {op}?',
+    # ])
     return example.Problem(
         question=example.question(context, template, op=op),
         answer=value)

@@ -18,26 +18,26 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from mathematics_dataset.modules import algebra
+# from mathematics_dataset.modules import algebra
 from mathematics_dataset.modules import arithmetic
-from mathematics_dataset.modules import calculus
-from mathematics_dataset.modules import comparison
-from mathematics_dataset.modules import measurement
-from mathematics_dataset.modules import numbers
-from mathematics_dataset.modules import polynomials
-from mathematics_dataset.modules import probability
+# from mathematics_dataset.modules import calculus
+# from mathematics_dataset.modules import comparison
+# from mathematics_dataset.modules import measurement
+# from mathematics_dataset.modules import numbers
+# from mathematics_dataset.modules import polynomials
+# from mathematics_dataset.modules import probability
 import six
 
 
 all_ = {
-    'algebra': algebra,
+    # 'algebra': algebra,
     'arithmetic': arithmetic,
-    'calculus': calculus,
-    'comparison': comparison,
-    'measurement': measurement,
-    'numbers': numbers,
-    'polynomials': polynomials,
-    'probability': probability,
+    # 'calculus': calculus,
+    # 'comparison': comparison,
+    # 'measurement': measurement,
+    # 'numbers': numbers,
+    # 'polynomials': polynomials,
+    # 'probability': probability,
 }
 
 
