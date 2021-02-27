@@ -11,9 +11,13 @@ Reasoning Abilities of Neural Models](https://openreview.net/pdf?id=H1gR5iR5FX)
 ## For CS 224N Final Project
 
 Make sure you're in the `mathematics_dataset` directory, not the `mathematics_dataset/mathematics_dataset` directory.
+
 I created a YAML file for easy conda environment setup. Run this: `conda env create -f local_env.yml`
+
 To generate samples in your terminal window, run `python -m mathematics_dataset.generate`
+
 To generate samples to a file, run `python -m mathematics_dataset.generate_to_file --output_dir=[NAME_OF_OUTPUT_DIRECTORY]`
+
 Additional flags to include: 
 - `--per_train_module=[NUMBER]`: generates `per_train_module // 3` examples each for `train-easy`, `train-medium`, and `train-hard` respectively. 
 - `--per_test_module=[NUMBER]`: generates `per_test_module` examples each for `interpolate` and `extrapolate`.
