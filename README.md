@@ -22,6 +22,8 @@ Additional flags to include:
 - `--per_train_module=[NUMBER]`: generates `per_train_module // 3` examples each for `train-easy`, `train-medium`, and `train-hard` respectively. 
 - `--per_test_module=[NUMBER]`: generates `per_test_module` examples each for `interpolate` and `extrapolate`.
 
+To convert the generated `.txt` data files to `.tsv` format, run `tsv_formatting.py` after having generated the output with the commands above. Make sure the parameters `NUM_EXAMPLES` and `raw_data_dir` are set correctly. See the file for more details.
+
 
 ## Example questions
 
