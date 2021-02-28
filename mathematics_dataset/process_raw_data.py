@@ -71,7 +71,7 @@ for folder in folder_names:
                 question = f.readline().strip()
                 answer = str(round(eval(f.readline().strip()), 12))
                 if not args.steps:
-                    tsv_writer.writerow([question, answer, question_type])
+                    tsv_writer.writerow([question, answer, 1, question_type])
                 else:
                     datapoints = generate_datapoints(question)
                     # Ensure validity of parsed datapoints
