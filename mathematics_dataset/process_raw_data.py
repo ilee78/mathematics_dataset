@@ -16,8 +16,9 @@ from six.moves import range
 from arithmetic_parser import generate_datapoints
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--steps", help="if specified, outputs step-by-step datapoints",
-                    action="store_true")
+# parser.add_argument("--steps", help="if specified, outputs step-by-step datapoints",
+#                     action="store_true")
+parser.add_argument("--num-steps", type=int, help="number of intermediate steps to show", default=0)
 args = parser.parse_args()
 
 # Number of training examples in each .txt file
@@ -70,15 +71,15 @@ for folder in folder_names:
             for i in range(NUM_EXAMPLES):
                 question = f.readline().strip()
                 answer = str(round(eval(f.readline().strip()), 12))
-                if not args.steps:
+                if not args.num_steps:
                     tsv_writer.writerow([question, answer, 1, question_type])
                 else:
-                    datapoints = generate_datapoints(question)
+                    datapoints = generate_datapoints(question, num_intermediates=args.num_steps)
                     # Ensure validity of parsed datapoints
                     assert(len(datapoints) > 0)
-                    if not math.isclose(eval(datapoints[-1][1]), eval(answer)):
+                    if not math.isclose(eval(datapoints[0][1]), eval(answer)):
                         print('parsed answer: {}\ngenerated answer: {}'.format(eval(datapoints[-1][1]), eval(answer)))
-                    assert(math.isclose(eval(datapoints[-1][1]), eval(answer)))
+                    assert(math.isclose(eval(datapoints[0][1]), eval(answer)))
 
                     for q, a, finished in datapoints:
                         tsv_writer.writerow([q, a, finished, question_type])

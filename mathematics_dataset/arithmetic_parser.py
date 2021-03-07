@@ -197,7 +197,8 @@ def parse(inputstring: str) -> Node:
   match(tokens, TokenType.T_END)
   return ast
 
-def generate_datapoints(inputstring: str, debug=False) -> [(str, str, int)]:
+# enable step corruption by setting num_intermediates to a non-negative integer
+def generate_datapoints(inputstring: str, num_intermediates = -1, debug=False) -> [(str, str, int)]:
   """ Generates a list of (expr, next_expr, finished) tuples for a given arithmetic expression.
   """
   datapoints = []
@@ -210,10 +211,15 @@ def generate_datapoints(inputstring: str, debug=False) -> [(str, str, int)]:
     finished = not ast.is_reducable()
 
     datapoints.append((curr, reduced, int(finished)))
+
+  # step corruption
+  if (num_intermediates >= 0):
+    num_intermediates = min(num_intermediates, len(datapoints) - 1)
+    datapoints = [datapoints[-1]] + random.sample(datapoints[:-1], num_intermediates)
   
   return datapoints
 
 if __name__ == '__main__':
   # ast = parse(inp)
-  for datapoint in generate_datapoints(sys.argv[1], debug=True):
+  for datapoint in generate_datapoints(sys.argv[1], num_intermediates = 3, debug=True):
     print(datapoint)
