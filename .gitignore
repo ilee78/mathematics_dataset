@@ -1,2 +1,12 @@
-raw_data_tsv/*
+raw_data_tsv/
+raw_data/
+raw_data_old/
 __pycache__
+
+*.py[cod]
+*$py.class
+
+.vscode
+
+pip-log.txt
+pip-delete-this-directory.txt
