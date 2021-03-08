@@ -1,7 +1,8 @@
 raw_data_tsv/
 raw_data/
 raw_data_old/
-__pycache__
+**/__pycache__/
+**/*.pyc
 
 *.py[cod]
 *$py.class
