@@ -98,7 +98,9 @@ def process_file(in_filename, out_filename, num_steps, question_type):
     with open(in_filename, "r") as in_file:
         with open(out_filename, "w") as out_file:
             tsv_writer = csv.writer(out_file, delimiter='\t')
-            for question, answer in itertools.zip_longest(*[in_file]*2):
+            for i, (question, answer) in enumerate(itertools.zip_longest(*[in_file]*2)):
+                if (i % 1000 == 0):
+                    print('progress: {}'.format(i))
                 question = sanitize_question(question)
                 answer = answer.strip()
                 # answer = str(round(eval(question, 12)))
