@@ -85,12 +85,21 @@ from arithmetic_parser import generate_datapoints
 #         print(f'Writing to {tsv_file}')
 #         f.close()
 
+def sanitize_question(question):
+    question = question.strip()
+    question = ''.join(
+        filter(lambda c: not c.isalpha(), question.split())
+    )
+    if question[-1] == '.' or question[-1] == '?':
+        question = question[:-1]
+    return question
+
 def process_file(in_filename, out_filename, num_steps, question_type):
     with open(in_filename, "r") as in_file:
         with open(out_filename, "w") as out_file:
             tsv_writer = csv.writer(out_file, delimiter='\t')
             for question, answer in itertools.zip_longest(*[in_file]*2):
-                question = question.strip()
+                question = sanitize_question(question)
                 answer = answer.strip()
                 # answer = str(round(eval(question, 12)))
                 if not num_steps:
