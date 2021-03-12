@@ -6,7 +6,7 @@ from process_raw_data import sanitize_question
 
 def print_histogram(hist: dict, max_width = 20):
     max_freq = max(hist.values())
-    for k in hist:
+    for k in sorted(hist.keys()):
         num_to_print = int(max_width * hist[k]/max_freq)
         print('{}:\t{}'.format(k, '*' * num_to_print))
 
