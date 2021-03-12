@@ -6,6 +6,7 @@ from arithmetic_parser import generate_datapoints
 from process_raw_data import sanitize_question
 
 def print_histogram(hist: dict, max_width = 20):
+    print('-' * 80)
     max_freq = max(hist.values())
     for k in sorted(hist.keys()):
         num_to_print = int(max_width * hist[k]/max_freq)
@@ -20,7 +21,9 @@ def profile_question(question, counts):
 def profile_txt(filename):
     counts = {}
     with open(filename) as f:
-        for (question, _) in itertools.zip_longest(*[f]*2):
+        for i, (question, _) in enumerate(itertools.zip_longest(*[f]*2)):
+            if i % 10000 == 0:
+                print('{}...'.format(i))
             question = sanitize_question(question)
             profile_question(question, counts)
     return counts
@@ -28,7 +31,9 @@ def profile_txt(filename):
 def profile_tsv(filename):
     counts = {}
     with open(filename) as f:
-        for sample in f:
+        for i, sample in enumerate(f):
+            if i % 10000 == 0:
+                print('{}...'.format(i))
             question = sample.split('\t')[0]
             profile_question(question, counts)
     return counts
