@@ -12,6 +12,7 @@ import enum
 import re
 import operator
 import random
+from scipy.stats import skewnorm
 
 class TokenType(enum.Enum):
   T_NUM = 0
@@ -215,7 +216,13 @@ def generate_datapoints(inputstring: str, num_intermediates = -1, debug=False) -
   # step corruption
   if (num_intermediates >= 0):
     num_intermediates = min(num_intermediates, len(datapoints) - 1)
-    datapoints = [datapoints[-1]] + random.sample(datapoints[:-1], num_intermediates)
+
+    indices = skewnorm.rvs(-0.1, size=num_intermediates)
+    # print(indices)
+    intermediates = list(map(lambda i: datapoints[:-1][min(max(int(i * len(datapoints[:-1])), 0), len(datapoints[:-1]) - 1)], indices))
+    datapoints = [datapoints[-1]] + intermediates
+    # datapoints = intermediates
+    # datapoints = [datapoints[-1]] + random.sample(datapoints[:-1], num_intermediates)
   
   return datapoints
 
