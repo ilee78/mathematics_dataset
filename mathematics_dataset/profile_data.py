@@ -5,9 +5,9 @@ from arithmetic_parser import generate_datapoints
 from process_raw_data import sanitize_question
 
 def print_histogram(hist: dict, max_width = 20):
-    total_mass = sum(hist.values())
+    max_freq = max(hist.values())
     for k in hist:
-        num_to_print = int(max_width * hist[k]/total_mass)
+        num_to_print = int(max_width * hist[k]/max_freq)
         print('{}:\t{}'.format(k, '*' * num_to_print))
 
 
