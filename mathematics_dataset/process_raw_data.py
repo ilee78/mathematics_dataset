@@ -94,9 +94,9 @@ def sanitize_question(question):
         question = question[:-1]
     return question
 
-def process_file(in_filename, out_filename, num_steps, question_type):
-    with open(in_filename, "r") as in_file:
-        with open(out_filename, "w") as out_file:
+def process_file(args):
+    with open(args.file, "r") as in_file:
+        with open(args.output, "w") as out_file:
             tsv_writer = csv.writer(out_file, delimiter='\t')
             for i, (question, answer) in enumerate(itertools.zip_longest(*[in_file]*2)):
                 if (i % 1000 == 0):
@@ -104,10 +104,10 @@ def process_file(in_filename, out_filename, num_steps, question_type):
                 question = sanitize_question(question)
                 answer = answer.strip()
                 # answer = str(round(eval(question, 12)))
-                if not num_steps:
+                if not args.num_steps:
                     tsv_writer.writerow([question, answer, 1, question_type])
                 else:
-                    datapoints = generate_datapoints(question, num_intermediates=num_steps)
+                    datapoints = generate_datapoints(question, num_intermediates=args.num_steps, with_markers = args.with_markers)
                     # Ensure validity of parsed datapoints
                     assert(len(datapoints) > 0)
                     # if not math.isclose(eval(datapoints[0][1]), eval(answer)):
@@ -115,7 +115,7 @@ def process_file(in_filename, out_filename, num_steps, question_type):
                     # assert(math.isclose(eval(datapoints[0][1]), eval(answer)))
 
                     for q, a, finished in datapoints:
-                        tsv_writer.writerow([q, a, finished, question_type])
+                        tsv_writer.writerow([q, a, finished, args.type])
 
 
 if __name__ == "__main__":
@@ -124,6 +124,7 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--output", type=str, help="output filename", required=True)
     parser.add_argument("--num-steps", type=int, help="number of intermediate steps to show", default=0)
     parser.add_argument("-t", "--type", type=str, help="question type in the file", default="N/A")
+    parser.add_argument("--with-markers", action="store_true", default=False)
 
     args = parser.parse_args()
-    process_file(args.file, args.output, args.num_steps, args.type)
+    process_file(args)

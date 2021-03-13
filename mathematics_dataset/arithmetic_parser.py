@@ -14,6 +14,9 @@ import operator
 import random
 from scipy.stats import skewnorm
 
+START_MARKER = '\u59cb'
+END_MARKER = '\u7d42'
+
 class TokenType(enum.Enum):
   T_NUM = 0
   T_PLUS = 1
@@ -37,6 +40,7 @@ class Node:
     self.value = value
     self.children = []
     self.paren = False
+    self.staged = False
 
   def to_string(self, debug=False) -> str:
     """ Converts the AST to a string representation. Enable debug for readability (spaces).
@@ -56,6 +60,8 @@ class Node:
 
     if self.paren:
       s = '(' + s + ')'
+    if self.staged:
+      s = START_MARKER + s + END_MARKER
 
     return s
 
@@ -76,20 +82,24 @@ class Node:
     left_reducable = self.children[0].is_reducable()
     right_reducable = self.children[1].is_reducable()
     if not (left_reducable or right_reducable):
-      assert(self.children[0].token_type == TokenType.T_NUM)
-      assert(self.children[1].token_type == TokenType.T_NUM)
+      if self.staged:
+        assert(self.children[0].token_type == TokenType.T_NUM)
+        assert(self.children[1].token_type == TokenType.T_NUM)
 
-      left_val = self.children[0].value
-      right_val = self.children[1].value
-      operation = operations[self.token_type]
+        left_val = self.children[0].value
+        right_val = self.children[1].value
+        operation = operations[self.token_type]
 
-      self.token_type = TokenType.T_NUM
-      self.paren = False
-      self.value = operation(left_val, right_val)
-      if int(self.value) == self.value:
-        self.value = int(self.value)
-      self.children = []
-      return
+        self.token_type = TokenType.T_NUM
+        self.paren = False
+        self.value = operation(left_val, right_val)
+        if int(self.value) == self.value:
+          self.value = int(self.value)
+        self.children = []
+        self.staged = False
+        return
+      else:
+        self.staged = True
 
     # Otherwise, pick one of the children to reduce
     child_ind = 0 if left_reducable else 1
@@ -198,8 +208,18 @@ def parse(inputstring: str) -> Node:
   match(tokens, TokenType.T_END)
   return ast
 
+
+def sample_indices(n, size):
+  while True:
+    indices = skewnorm.rvs(-0.1, size=n)
+    indices = set(map(lambda i: min(max(int(i * (size - 1)), 0), size - 1), indices))
+    if len(indices) == n:
+      return indices
+
+
 # enable step corruption by setting num_intermediates to a non-negative integer
-def generate_datapoints(inputstring: str, num_intermediates = -1, debug=False) -> [(str, str, int)]:
+def generate_datapoints(inputstring: str, num_intermediates = -1, debug=False,
+                        with_markers = False) -> [(str, str, int)]:
   """ Generates a list of (expr, next_expr, finished) tuples for a given arithmetic expression.
   """
   datapoints = []
@@ -208,6 +228,8 @@ def generate_datapoints(inputstring: str, num_intermediates = -1, debug=False) -
   while ast.is_reducable():
     curr = ast.to_string(debug)
     ast.step()
+    if not with_markers:
+      ast.step() # skip the staging step
     reduced = ast.to_string(debug)
     finished = not ast.is_reducable()
 
@@ -217,9 +239,9 @@ def generate_datapoints(inputstring: str, num_intermediates = -1, debug=False) -
   if (num_intermediates >= 0):
     num_intermediates = min(num_intermediates, len(datapoints) - 1)
 
-    indices = skewnorm.rvs(-0.1, size=num_intermediates)
+    indices =  sample_indices(num_intermediates, len(datapoints[:-1]))
     # print(indices)
-    intermediates = list(map(lambda i: datapoints[:-1][min(max(int(i * len(datapoints[:-1])), 0), len(datapoints[:-1]) - 1)], indices))
+    intermediates = list(map(lambda i: datapoints[:-1][i], indices))
     datapoints = [datapoints[-1]] + intermediates
     # datapoints = intermediates
     # datapoints = [datapoints[-1]] + random.sample(datapoints[:-1], num_intermediates)
@@ -228,5 +250,5 @@ def generate_datapoints(inputstring: str, num_intermediates = -1, debug=False) -
 
 if __name__ == '__main__':
   # ast = parse(inp)
-  for datapoint in generate_datapoints(sys.argv[1], num_intermediates = 3, debug=True):
+  for datapoint in generate_datapoints(sys.argv[1], num_intermediates = 2, debug=True, with_markers=True):
     print(datapoint)
