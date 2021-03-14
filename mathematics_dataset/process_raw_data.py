@@ -15,7 +15,7 @@ import itertools
 from absl import logging
 import six
 from six.moves import range
-from arithmetic_parser import generate_datapoints
+from arithmetic_parser import process_frt, process_wsrt
 
 # # Number of training examples in each .txt file
 # # This number must equal (per_train_module // 3) and (per_test_module)
@@ -103,28 +103,27 @@ def process_file(args):
                     print('progress: {}'.format(i))
                 question = sanitize_question(question)
                 answer = answer.strip()
-                # answer = str(round(eval(question, 12)))
-                if not args.num_steps:
-                    tsv_writer.writerow([question, answer, 1, question_type])
-                else:
-                    datapoints = generate_datapoints(question, num_intermediates=args.num_steps, with_markers = args.with_markers)
-                    # Ensure validity of parsed datapoints
-                    assert(len(datapoints) > 0)
-                    # if not math.isclose(eval(datapoints[0][1]), eval(answer)):
-                    #     print('parsed answer: {}\ngenerated answer: {}'.format(eval(datapoints[-1][1]), eval(answer)))
-                    # assert(math.isclose(eval(datapoints[0][1]), eval(answer)))
 
-                    for q, a, finished in datapoints:
-                        tsv_writer.writerow([q, a, finished, args.type])
+                if args.model == "frt":
+                    datapoints = process_frt(question, num_intermediates=args.num_steps, with_markers = args.with_markers)
+                else:
+                    assert args.model == "wsrt", "something went wrong and your model type is neither 'frt' nor 'wsrt'"
+                    datapoints = process_wsrt(question, max_size=args.num_steps)
+                assert(len(datapoints) > 0)
+                # print(datapoints)
+
+                for (q, a, finished) in datapoints:
+                    tsv_writer.writerow([q, a, finished, args.type])
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--file", type=str, help="single file to process", required=True)
     parser.add_argument("-o", "--output", type=str, help="output filename", required=True)
-    parser.add_argument("--num-steps", type=int, help="number of intermediate steps to show", default=0)
+    parser.add_argument("--num-steps", type=int, help="number of intermediate steps to show (FRT) or max question size (WSRT)", default=-1)
     parser.add_argument("-t", "--type", type=str, help="question type in the file", default="N/A")
     parser.add_argument("--with-markers", action="store_true", default=False)
+    parser.add_argument("--model", type=str, choices=["frt", "wsrt"], required=True)
 
     args = parser.parse_args()
     process_file(args)

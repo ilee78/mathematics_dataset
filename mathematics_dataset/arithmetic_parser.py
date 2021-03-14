@@ -218,8 +218,7 @@ def sample_indices(n, size):
 
 
 # enable step corruption by setting num_intermediates to a non-negative integer
-def generate_datapoints(inputstring: str, num_intermediates = -1, debug=False,
-                        with_markers = False) -> [(str, str, int)]:
+def generate_datapoints(inputstring: str, debug=False, with_markers = False) -> [(str, str, int)]:
   """ Generates a list of (expr, next_expr, finished) tuples for a given arithmetic expression.
   """
   datapoints = []
@@ -235,6 +234,13 @@ def generate_datapoints(inputstring: str, num_intermediates = -1, debug=False,
 
     datapoints.append((curr, reduced, int(finished)))
 
+    # datapoints = intermediates
+    # datapoints = [datapoints[-1]] + random.sample(datapoints[:-1], num_intermediates)
+  
+  return datapoints
+
+def process_frt(inputstring: str, num_intermediates = -1, debug=False, with_markers = False):
+  datapoints = generate_datapoints(inputstring, debug, with_markers)
   # step corruption
   if (num_intermediates >= 0):
     num_intermediates = min(num_intermediates, len(datapoints) - 1)
@@ -243,12 +249,21 @@ def generate_datapoints(inputstring: str, num_intermediates = -1, debug=False,
     # print(indices)
     intermediates = list(map(lambda i: datapoints[:-1][i], indices))
     datapoints = [datapoints[-1]] + intermediates
-    # datapoints = intermediates
-    # datapoints = [datapoints[-1]] + random.sample(datapoints[:-1], num_intermediates)
   
   return datapoints
+    
+def process_wsrt(inputstring: str, max_size = 0, debug=False):
+  datapoints = generate_datapoints(inputstring, debug)
+  answer = datapoints[-1][1]
+  datapoints = [(datapoints[i][0], answer, len(datapoints) - i) for i in range(len(datapoints))]
+  max_size = min(max_size, len(datapoints)) if max_size > 0 else len(datapoints)
+  start = len(datapoints) - max_size
+  datapoints = datapoints[start:]
+
+  return [datapoints[random.randint(0, len(datapoints) - 1)]]
 
 if __name__ == '__main__':
   # ast = parse(inp)
-  for datapoint in generate_datapoints(sys.argv[1], num_intermediates = 2, debug=True, with_markers=True):
-    print(datapoint)
+  # for datapoint in generate_datapoints(sys.argv[1], num_intermediates = 2, debug=True, with_markers=True):
+  #   print(datapoint)
+  print(process_wsrt(sys.argv[1], max_size = 3))
