@@ -33,8 +33,8 @@ with open("raw_data_tsv/super_simple_longer.tsv", "w") as fout:
             max_digits = 20
         if num_ops == 3:
             max_digits = 15
-        
-        num_digits = [random.randint(1, max_digits) for i in range(num_ops + 1)]
+
+        num_digits = [random.randint(max_digits // 2, max_digits) for i in range(num_ops + 1)]
         q, a = make_q_a(num_digits, num_ops)
         tsv_writer.writerow([q, a, 1, "super_simple_longer"])
         # q_len += len(q)
