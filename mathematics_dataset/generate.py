@@ -109,6 +109,7 @@ def init_modules(train_split=False):
   counts['train-easy'] = FLAGS.per_train_module // 3
   counts['train-medium'] = FLAGS.per_train_module // 3
   counts['train-hard'] = FLAGS.per_train_module // 3
+
   counts['interpolate'] = FLAGS.per_test_module
   counts['extrapolate'] = FLAGS.per_test_module
 

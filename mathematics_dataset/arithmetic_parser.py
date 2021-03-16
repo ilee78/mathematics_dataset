@@ -12,6 +12,10 @@ import enum
 import re
 import operator
 import random
+from scipy.stats import skewnorm
+
+START_MARKER = '\u59cb'
+END_MARKER = '\u7d42'
 
 class TokenType(enum.Enum):
   T_NUM = 0
@@ -36,12 +40,19 @@ class Node:
     self.value = value
     self.children = []
     self.paren = False
+    self.staged = False
 
   def to_string(self, debug=False) -> str:
     """ Converts the AST to a string representation. Enable debug for readability (spaces).
     """
-    s = str(self.value)
-    if self.token_type != TokenType.T_NUM:
+    if self.token_type == TokenType.T_NUM:
+      # Deal with annoying floating point precision stuff
+      val = round(self.value, 12)
+      if val == int(val):
+        val = int(val)
+      s = str(val)
+
+    else:
       sep = ' ' if debug else ''
       left_str = self.children[0].to_string(debug)
       right_str = self.children[1].to_string(debug)
@@ -49,13 +60,15 @@ class Node:
 
     if self.paren:
       s = '(' + s + ')'
+    if self.staged:
+      s = START_MARKER + s + END_MARKER
 
     return s
 
   def is_reducable(self) -> bool:
     """ Convenience function to determine whether this Node is reducable.
     """
-    return self.token_type != TokenType.T_NUM or self.paren
+    return self.token_type != TokenType.T_NUM
 
   def step(self):
     """ Reduces the expression represented by this Node by randomly selecting one of its children
@@ -63,31 +76,33 @@ class Node:
     numerical value of this Node.
     """
     if self.token_type == TokenType.T_NUM:
-      self.paren = False
       return
     
     # If both children are numeric, reduce this node
     left_reducable = self.children[0].is_reducable()
     right_reducable = self.children[1].is_reducable()
     if not (left_reducable or right_reducable):
-      assert(self.children[0].token_type == TokenType.T_NUM)
-      assert(self.children[1].token_type == TokenType.T_NUM)
+      if self.staged:
+        assert(self.children[0].token_type == TokenType.T_NUM)
+        assert(self.children[1].token_type == TokenType.T_NUM)
 
-      left_val = self.children[0].value
-      right_val = self.children[1].value
-      operation = operations[self.token_type]
+        left_val = self.children[0].value
+        right_val = self.children[1].value
+        operation = operations[self.token_type]
 
-      self.token_type = TokenType.T_NUM
-      self.value = operation(left_val, right_val)
-      if int(self.value) == self.value:
-        self.value = int(self.value)
-      self.children = []
-      return
+        self.token_type = TokenType.T_NUM
+        self.paren = False
+        self.value = operation(left_val, right_val)
+        if int(self.value) == self.value:
+          self.value = int(self.value)
+        self.children = []
+        self.staged = False
+        return
+      else:
+        self.staged = True
 
     # Otherwise, pick one of the children to reduce
     child_ind = 0 if left_reducable else 1
-    if left_reducable and right_reducable:
-      child_ind = random.randint(0, 1)
     self.children[child_ind].step()
 
 
@@ -187,12 +202,23 @@ def parse_e3(tokens: [Node]) -> Node:
 def parse(inputstring: str) -> Node:
   """ Parses an arithmetic string into an abstract syntax tree.
   """
+  inputstring = ''.join(inputstring.split())
   tokens = lexical_analysis(inputstring)
   ast = parse_e(tokens)
   match(tokens, TokenType.T_END)
   return ast
 
-def generate_datapoints(inputstring: str, debug=False) -> [(str, str, bool)]:
+
+def sample_indices(n, size):
+  while True:
+    indices = skewnorm.rvs(-0.1, size=n)
+    indices = set(map(lambda i: min(max(int(i * (size - 1)), 0), size - 1), indices))
+    if len(indices) == n:
+      return indices
+
+
+# enable step corruption by setting num_intermediates to a non-negative integer
+def generate_datapoints(inputstring: str, debug=False, with_markers = False) -> [(str, str, int)]:
   """ Generates a list of (expr, next_expr, finished) tuples for a given arithmetic expression.
   """
   datapoints = []
@@ -201,15 +227,43 @@ def generate_datapoints(inputstring: str, debug=False) -> [(str, str, bool)]:
   while ast.is_reducable():
     curr = ast.to_string(debug)
     ast.step()
+    if not with_markers:
+      ast.step() # skip the staging step
     reduced = ast.to_string(debug)
     finished = not ast.is_reducable()
 
-    datapoints.append((curr, reduced, finished))
+    datapoints.append((curr, reduced, int(finished)))
+
+    # datapoints = intermediates
+    # datapoints = [datapoints[-1]] + random.sample(datapoints[:-1], num_intermediates)
   
   return datapoints
 
+def process_frt(inputstring: str, num_intermediates = -1, debug=False, with_markers = False):
+  datapoints = generate_datapoints(inputstring, debug, with_markers)
+  # step corruption
+  if (num_intermediates >= 0):
+    num_intermediates = min(num_intermediates, len(datapoints) - 1)
+
+    indices =  sample_indices(num_intermediates, len(datapoints[:-1]))
+    # print(indices)
+    intermediates = list(map(lambda i: datapoints[:-1][i], indices))
+    datapoints = [datapoints[-1]] + intermediates
+  
+  return datapoints
+    
+def process_wsrt(inputstring: str, max_size = 0, debug=False):
+  datapoints = generate_datapoints(inputstring, debug)
+  answer = datapoints[-1][1]
+  datapoints = [(datapoints[i][0], answer, len(datapoints) - i) for i in range(len(datapoints))]
+  max_size = min(max_size, len(datapoints)) if max_size > 0 else len(datapoints)
+  start = len(datapoints) - max_size
+  datapoints = datapoints[start:]
+
+  return [datapoints[random.randint(0, len(datapoints) - 1)]]
+
 if __name__ == '__main__':
-  inp = ''.join(sys.argv[1].split())
   # ast = parse(inp)
-  for datapoint in generate_datapoints(inp, debug=True):
-    print(datapoint)
+  # for datapoint in generate_datapoints(sys.argv[1], num_intermediates = 2, debug=True, with_markers=True):
+  #   print(datapoint)
+  print(process_wsrt(sys.argv[1], max_size = 3))

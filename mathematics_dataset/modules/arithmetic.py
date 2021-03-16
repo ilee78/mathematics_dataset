@@ -56,20 +56,20 @@ def _make_modules(entropy, add_sub_entropy):
   return {
       # Addition and subtraction of integers (and decimals)
       'add_or_sub': functools.partial(
-          add_or_sub, None, add_sub_sample_args_pure),
+          add_or_sub, None, add_sub_sample_args_pure),      # uncomment
       'add_sub_multiple': functools.partial(
           add_sub_multiple, _INT, sample_args_pure),
       # 'add_or_sub_in_base': functools.partial(
       #     add_or_sub_in_base, sample_args_pure),
 
       # Multiplication and division
-      'mul': functools.partial(mul, None, sample_args_pure),
-      'div': functools.partial(div, None, sample_args_pure),
-      'mul_div_multiple': functools.partial(
+      'mul': functools.partial(mul, None, sample_args_pure),    # uncomment
+      'div': functools.partial(div, None, sample_args_pure),    # uncomment
+      'mul_div_multiple': functools.partial(                    # uncomment
           mul_div_multiple, _INT_OR_RATIONAL, sample_args_pure),
 
       # All together!
-      'mixed': functools.partial(mixed, _INT_OR_RATIONAL, sample_args_pure),
+      'mixed': functools.partial(mixed, _INT_OR_RATIONAL, sample_args_pure),  # uncomment
 
       # # And some other arithmetic-related stuff.
       # 'nearest_integer_root': functools.partial(
@@ -111,7 +111,7 @@ def test_extra():
     return mixed(_INT, sample_args_pure, length=extrapolate_length())
 
   return {
-      'add_or_sub_big': functools.partial(
+      'add_or_sub_big': functools.partial(                          # uncomment everything commented here
           add_or_sub, None, add_sub_sample_args_pure),
       'mul_big': functools.partial(mul, None, sample_args_pure),
       'div_big': functools.partial(div, None, sample_args_pure),
